@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { ScanSearch } from "lucide-react"
 import { UploadState } from "@/components/upload-state"
 import { ProcessingState } from "@/components/processing-state"
@@ -6,14 +6,22 @@ import { ResultsState } from "@/components/results-state"
 
 export default function App() {
   const [state, setState] = useState("UPLOAD")
-  // Now stores an object containing the file and all search parameters
   const [searchData, setSearchData] = useState(null)
+  
+  // New state to hold the final JSON from the backend
+  const [jobResults, setJobResults] = useState(null)
 
-  useEffect(() => {
-    if (state !== "PROCESSING") return
-    const timeout = setTimeout(() => setState("RESULTS"), 3000)
-    return () => clearTimeout(timeout)
-  }, [state])
+  // Triggered when the polling loop detects a non-PROCESSING state
+  function handleProcessComplete(resultPayload) {
+    setJobResults(resultPayload)
+    setState("RESULTS")
+  }
+
+  function handleReset() {
+    setSearchData(null)
+    setJobResults(null)
+    setState("UPLOAD")
+  }
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -32,17 +40,22 @@ export default function App() {
         {state === "UPLOAD" && (
           <UploadState 
             onScan={(data) => {
-              setSearchData(data)      // Save the bundle
-              setState("PROCESSING")   // Move to the next screen
+              setSearchData(data)
+              setState("PROCESSING")
             }} 
           />
         )}
         
-        {/* Pass the bundled data object into the processing component */}
-        {state === "PROCESSING" && <ProcessingState searchData={searchData} />}
+        {state === "PROCESSING" && (
+          <ProcessingState 
+            searchData={searchData} 
+            onComplete={handleProcessComplete} 
+          />
+        )}
         
         {state === "RESULTS" && (
-          <ResultsState onReset={() => setState("UPLOAD")} />
+          // We pass the payload here so ResultsState can adapt to it later
+          <ResultsState payload={jobResults} onReset={handleReset} />
         )}
       </main>
     </div>
