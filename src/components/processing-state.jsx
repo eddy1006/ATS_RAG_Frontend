@@ -89,7 +89,7 @@ export function ProcessingState({ searchData, onComplete }) {
           } finally {
             isPolling.current = false;
           }
-        }, 5000)
+        }, 15000)
 
       } catch (err) {
         console.error("Initialization error:", err)
