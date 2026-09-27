@@ -43,7 +43,7 @@ export function ProcessingState({ searchData, onComplete }) {
         if (searchData.workplaceType) formData.append("workplaceType", searchData.workplaceType)
 
         // 1. Initial POST request
-        const postRes = await fetch("http://localhost:8080/api/resume/upload", {
+        const postRes = await fetch("/api/resume/upload", {
           method: "POST",
           body: formData,
         })
@@ -61,7 +61,7 @@ export function ProcessingState({ searchData, onComplete }) {
           isPolling.current = true;
 
           try {
-            const statusRes = await fetch(`http://localhost:8080/api/resume/status/${taskId}`)
+            const statusRes = await fetch(`/api/resume/status/${taskId}`)
             
             if (!statusRes.ok) {
               if (statusRes.status === 404) {
